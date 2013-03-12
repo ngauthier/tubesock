@@ -7,16 +7,6 @@ class Tubesock
     @version    = version
   end
 
-  def self.call(env)
-    if websocket?(env)
-      tubesock = hijack(env)
-      tubesock.listen
-      [ -1, {}, [] ]
-    else
-      [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
-    end
-  end
-
   def self.hijack(env)
     env['rack.hijack'].call
     socket = env['rack.hijack_io']
