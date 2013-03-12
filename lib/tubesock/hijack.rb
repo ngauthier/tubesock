@@ -6,7 +6,7 @@ class Tubesock
     included do
       def hijack
         if Tubesock.websocket?(env)
-          rocket = Tubesock.hijack(request, env)
+          rocket = Tubesock.hijack(env)
           yield rocket
           rocket.listen
           render text: nil, status: -1

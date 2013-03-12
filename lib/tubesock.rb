@@ -2,29 +2,22 @@ require "tubesock/version"
 require "tubesock/hijack" if defined?(Rails)
 
 class Tubesock
-  def initialize(request, socket, version)
+  def initialize(socket, version)
     @socket     = socket
     @version    = version
-    @request    = request
-    @params     = @request.params
-    @controller = ApplicationController.new
-    @controller.instance_variable_set(:@_env,     @request.env)
-    @controller.instance_variable_set(:@_request, @request)
   end
 
   def self.call(env)
     if websocket?(env)
-      request = ActionDispatch::Request.new(env)
-      rocket = hijack(request, env)
-      rocket.listen
+      tubesock = hijack(env)
+      tubesock.listen
       [ -1, {}, [] ]
     else
-      Rails.logger.info "Non-socket connection to Rocket #{env['HTTP_CONNECTION']} #{env['HTTP_UPGRADE']}"
       [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
     end
   end
 
-  def self.hijack(request, env)
+  def self.hijack(env)
     env['rack.hijack'].call
     socket = env['rack.hijack_io']
 
@@ -40,7 +33,7 @@ class Tubesock
 
     socket.write handshake.to_s
 
-    self.new request, socket, handshake.version
+    self.new socket, handshake.version
   end
 
   def self.websocket?(env)
