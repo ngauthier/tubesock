@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Tubesock::VERSION
   spec.authors       = ["Nick Gauthier"]
   spec.email         = ["ngauthier@gmail.com"]
-  spec.description   = %q{Websocket interface on Rack Hijack}
+  spec.description   = %q{Websocket interface on Rack Hijack w/ Rails support}
   spec.summary       = %q{Handle websocket connections via Rack and Rails 4 using concurrency}
   spec.homepage      = ""
   spec.license       = "MIT"
