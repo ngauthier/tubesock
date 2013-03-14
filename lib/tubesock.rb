@@ -2,28 +2,35 @@ require "tubesock/version"
 require "tubesock/hijack" if defined?(Rails)
 
 class Tubesock
+  class HijackNotAvailable < RuntimeError
+  end
+
   def initialize(socket, version)
     @socket     = socket
     @version    = version
   end
 
   def self.hijack(env)
-    env['rack.hijack'].call
-    socket = env['rack.hijack_io']
+    if env['rack.hijack']
+      env['rack.hijack'].call
+      socket = env['rack.hijack_io']
 
-    handshake = WebSocket::Handshake::Server.new
-    handshake.headers["sec-websocket-version"]    = env["HTTP_SEC_WEBSOCKET_VERSION"]
-    handshake.headers["sec-websocket-draft"]      = env["HTTP_SEC_WEBSOCKET_DRAFT"]
-    handshake.headers["sec-websocket-key"]        = env["HTTP_SEC_WEBSOCKET_KEY"]
-    handshake.headers["sec-websocket-extensions"] = env["HTTP_SEC_WEBSOCKET_EXTENSIONS"]
-    handshake.headers["host"]                     = env["HTTP_HOST"]
-    handshake.path                                = env["REQUEST_PATH"]
-    handshake.query                               = env["QUERY_STRING"]
-    handshake.set_version
+      handshake = WebSocket::Handshake::Server.new
+      handshake.headers["sec-websocket-version"]    = env["HTTP_SEC_WEBSOCKET_VERSION"]
+      handshake.headers["sec-websocket-draft"]      = env["HTTP_SEC_WEBSOCKET_DRAFT"]
+      handshake.headers["sec-websocket-key"]        = env["HTTP_SEC_WEBSOCKET_KEY"]
+      handshake.headers["sec-websocket-extensions"] = env["HTTP_SEC_WEBSOCKET_EXTENSIONS"]
+      handshake.headers["host"]                     = env["HTTP_HOST"]
+      handshake.path                                = env["REQUEST_PATH"]
+      handshake.query                               = env["QUERY_STRING"]
+      handshake.set_version
 
-    socket.write handshake.to_s
+      socket.write handshake.to_s
 
-    self.new socket, handshake.version
+      self.new socket, handshake.version
+    else
+      raise Tubesock::HijackNotAvailable
+    end
   end
 
   def self.websocket?(env)
