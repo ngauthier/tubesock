@@ -16,14 +16,7 @@ class Tubesock
       socket = env['rack.hijack_io']
 
       handshake = WebSocket::Handshake::Server.new
-      handshake.headers["sec-websocket-version"]    = env["HTTP_SEC_WEBSOCKET_VERSION"]
-      handshake.headers["sec-websocket-draft"]      = env["HTTP_SEC_WEBSOCKET_DRAFT"]
-      handshake.headers["sec-websocket-key"]        = env["HTTP_SEC_WEBSOCKET_KEY"]
-      handshake.headers["sec-websocket-extensions"] = env["HTTP_SEC_WEBSOCKET_EXTENSIONS"]
-      handshake.headers["host"]                     = env["HTTP_HOST"]
-      handshake.path                                = env["REQUEST_PATH"]
-      handshake.query                               = env["QUERY_STRING"]
-      handshake.set_version
+      handshake.from_rack env
 
       socket.write handshake.to_s
 
