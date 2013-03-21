@@ -8,6 +8,10 @@ class Tubesock
   def initialize(socket, version)
     @socket     = socket
     @version    = version
+
+    @open_handlers    = []
+    @message_handlers = []
+    @close_handlers   = []
   end
 
   def self.hijack(env)
@@ -41,15 +45,15 @@ class Tubesock
   end
 
   def onopen(&block)
-    @openhandler = block
+    @open_handlers << block
   end
 
   def onmessage(&block)
-    @messagehandler = block
+    @message_handlers << block
   end
 
   def onclose(&block)
-    @closehandler = block
+    @close_handlers << block
   end
 
   def listen
@@ -57,6 +61,7 @@ class Tubesock
       Thread.current.abort_on_exception = true
       framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
       running = true
+      @open_handlers.each(&:call)
       while running
         data, addrinfo = @socket.recvfrom(2000)
         running = false if data == ""
@@ -66,18 +71,12 @@ class Tubesock
           if data == ""
             running = false
           else
-            @messagehandler.call(HashWithIndifferentAccess.new(JSON.load(data))) if @messagehandler
+            @message_handlers.each{|h| h.call(HashWithIndifferentAccess.new(JSON.load(data))) }
           end
         end
       end
-      @closehandler.call if @closehandler
+      @close_handlers.each(&:call)
       @socket.close
     end
-    @openhandler.call if @openhandler
-  end
-
-  def close
-    @socket.close if @socket.open?
-    @closehandler.call
   end
 end
