@@ -1,10 +1,9 @@
 require 'bundler/setup'
 require 'minitest/autorun'
-require 'simplecov'
 require 'webrick'
 require 'stringio'
-SimpleCov.start
 require 'tubesock'
+require 'json'
 
 class Tubesock::TestCase < MiniTest::Unit::TestCase
 end
