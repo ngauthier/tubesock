@@ -9,9 +9,11 @@ class TubesockTest < Tubesock::TestCase
   end
 
   def test_hijack
-    # Autoload Frames before threading
+    # Force autoloading of classes
     WebSocket::Frame::Incoming::Client
     WebSocket::Frame::Outgoing::Client
+    WebSocket::Frame::Incoming::Server
+    WebSocket::Frame::Outgoing::Server
 
     interaction = TestInteraction.new
 
