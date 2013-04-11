@@ -1,5 +1,7 @@
 # Tubesock
 
+[![Build Status](https://travis-ci.org/ngauthier/tubesock.png)](https://travis-ci.org/ngauthier/tubesock)
+
 Tubesock lets you use websockets from rack and rails 4+ by using Rack's new hijack interface to access the underlying socket connection.
 
 In contrast to other websocket libraries, Tubesock does not use a reactor (read: no eventmachine). Instead, it leverages Rails 4's new full-stack concurrency support. Note that this means you must use a concurrent server. We recommend Puma.
