@@ -31,9 +31,9 @@ class Tubesock
   end
 
   def self.websocket?(env)
-    env['REQUEST_METHOD'] == 'GET' and
-    env['HTTP_CONNECTION'] and
-    env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') and
+    env['REQUEST_METHOD'] == 'GET' &&
+    env['HTTP_CONNECTION'] &&
+    env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') &&
     env['HTTP_UPGRADE'].downcase == 'websocket'
   end
 
