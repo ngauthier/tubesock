@@ -9,6 +9,13 @@ class TubesockTest < Tubesock::TestCase
   end
 
   def test_hijack
+    # Check to see if code loading is breaking travis
+    WebSocket::Frame::Incoming::Client
+    WebSocket::Frame::Outgoing::Client
+    WebSocket::Frame::Incoming::Server
+    WebSocket::Frame::Outgoing::Server
+
+
     interaction = TestInteraction.new
 
     opened = MockProc.new
