@@ -5,8 +5,19 @@ require 'webrick'
 SimpleCov.start
 require 'tubesock'
 
+class Tubesock::TestCase < MiniTest::Unit::TestCase
+  def wait
+    Timeout::timeout(5) do
+      while !yield
+        sleep 0.001
+      end
+    end
+  end
+end
 
-class Tubesock::TestInteraction
+# Abstrack away frames and sockets so that
+# tests can focus on message interaction
+class Tubesock::TestCase::TestInteraction
   def initialize
     @client_socket, @server_socket = UNIXSocket.pair
   end
