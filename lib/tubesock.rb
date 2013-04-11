@@ -57,6 +57,9 @@ class Tubesock
   end
 
   def listen
+    # force loading of these classes before threading
+    WebSocket::Frame::Incoming::Server
+    WebSocket::Frame::Outgoing::Server
     Thread.new do
       Thread.current.abort_on_exception = true
       @open_handlers.each(&:call)
