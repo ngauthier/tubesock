@@ -6,13 +6,6 @@ SimpleCov.start
 require 'tubesock'
 
 class Tubesock::TestCase < MiniTest::Unit::TestCase
-  def wait
-    Timeout::timeout(5) do
-      while !yield
-        sleep 0.001
-      end
-    end
-  end
 end
 
 # Abstrack away frames and sockets so that
@@ -59,19 +52,21 @@ class Tubesock::TestCase::TestInteraction
 
   def close
     @client_socket.close
+    @thread.join
   end
 
   def tubesock
     tubesock = Tubesock.hijack(env)
-    tubesock.listen
+    yield tubesock
+    @thread = tubesock.listen
     @client_socket.recvfrom 2000 # flush the handshake
     tubesock
   end
 end
 
-def Tubesock::TestPair
-  client_io, server_io = UNIXSocket.pair
-  client = Tubesock::TestClient.new(client_io)
-  server = Tubesock::TestServer.new(server_io)
-  [client, server]
+class MockProc
+  attr_reader :called
+  def to_proc
+    proc { @called = true }
+  end
 end

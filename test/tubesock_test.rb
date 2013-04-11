@@ -11,24 +11,24 @@ class TubesockTest < Tubesock::TestCase
   def test_hijack
     interaction = TestInteraction.new
 
-    sock = interaction.tubesock
+    opened = MockProc.new
+    closed = MockProc.new
 
-    opened = false
-    closed = false
+    interaction.tubesock do |tubesock|
+      tubesock.onopen  &opened
+      tubesock.onclose &closed
 
-    sock.onopen  { opened = true }
-    sock.onclose { closed = true }
-
-    sock.onmessage do |message|
-      sock.send_data message: "Hello #{message["name"]}"
+      tubesock.onmessage do |message|
+        tubesock.send_data message: "Hello #{message["name"]}"
+      end
     end
 
     interaction.write name: "Nick"
-
     data = interaction.read
     data["message"].must_equal "Hello Nick"
     interaction.close
 
-    wait { closed && opened }
+    opened.called.must_equal true
+    closed.called.must_equal true
   end
 end

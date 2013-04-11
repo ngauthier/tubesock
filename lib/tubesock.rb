@@ -2,6 +2,8 @@ require "tubesock/version"
 require "tubesock/hijack" if defined?(Rails)
 require "websocket"
 
+# Easily interact with WebSocket connections over Rack.
+# TODO: Example with pure Rack
 class Tubesock
   class HijackNotAvailable < RuntimeError
   end
@@ -32,7 +34,11 @@ class Tubesock
   end
 
   def send_data data, type = :text
-    frame = WebSocket::Frame::Outgoing::Server.new(version: @version, data: JSON.dump(data), type: type)
+    frame = WebSocket::Frame::Outgoing::Server.new(
+      version: @version,
+      data: JSON.dump(data),
+      type: type
+    )
     @socket.write frame.to_s
   rescue IOError
     close
@@ -53,19 +59,25 @@ class Tubesock
   def listen
     Thread.new do
       Thread.current.abort_on_exception = true
-      framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
       @open_handlers.each(&:call)
-      while !@socket.closed?
-        data, addrinfo = @socket.recvfrom(2000)
-        break if data.empty?
-        framebuffer << data
-        while frame = framebuffer.next
-          data = frame.data
-          @message_handlers.each{|h| h.call(JSON.load(data)) }
-        end
+      each_frame do |data|
+        @message_handlers.each{|h| h.call(JSON.load(data)) }
       end
       @close_handlers.each(&:call)
       @socket.close
+    end
+  end
+
+  private
+  def each_frame
+    framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
+    while !@socket.closed?
+      data, addrinfo = @socket.recvfrom(2000)
+      break if data.empty?
+      framebuffer << data
+      while frame = framebuffer.next
+        yield frame.data
+      end
     end
   end
 end
