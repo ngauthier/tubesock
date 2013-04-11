@@ -1,9 +1,6 @@
 require 'bundler/setup'
 require 'minitest/autorun'
 require 'simplecov'
+require 'webrick'
 SimpleCov.start
-
 require 'tubesock'
-
-class Tubesock::TestCase < MiniTest::Unit::TestCase
-end

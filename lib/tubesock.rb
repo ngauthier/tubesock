@@ -1,5 +1,6 @@
 require "tubesock/version"
 require "tubesock/hijack" if defined?(Rails)
+require "websocket"
 
 class Tubesock
   class HijackNotAvailable < RuntimeError
@@ -30,13 +31,6 @@ class Tubesock
     end
   end
 
-  def self.websocket?(env)
-    env['REQUEST_METHOD'] == 'GET' &&
-    env['HTTP_CONNECTION'] &&
-    env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') &&
-    env['HTTP_UPGRADE'].downcase == 'websocket'
-  end
-
   def send_data data, type = :text
     frame = WebSocket::Frame::Outgoing::Server.new(version: @version, data: JSON.dump(data), type: type)
     @socket.write frame.to_s
@@ -60,19 +54,14 @@ class Tubesock
     Thread.new do
       Thread.current.abort_on_exception = true
       framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
-      running = true
       @open_handlers.each(&:call)
-      while running
+      while !@socket.closed?
         data, addrinfo = @socket.recvfrom(2000)
-        running = false if data == ""
+        break if data.empty?
         framebuffer << data
         while frame = framebuffer.next
           data = frame.data
-          if data == ""
-            running = false
-          else
-            @message_handlers.each{|h| h.call(HashWithIndifferentAccess.new(JSON.load(data))) }
-          end
+          @message_handlers.each{|h| h.call(JSON.load(data)) }
         end
       end
       @close_handlers.each(&:call)
