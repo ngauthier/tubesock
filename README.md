@@ -1,6 +1,6 @@
 # Tubesock
 
-[![Build Status](https://travis-ci.org/ngauthier/tubesock.png)](https://travis-ci.org/ngauthier/tubesock)
+[![Build Status](https://travis-ci.org/ngauthier/tubesock.png)](https://travis-ci.org/ngauthier/tubesock) [![Code Climate](https://codeclimate.com/github/ngauthier/tubesock.png)](https://codeclimate.com/github/ngauthier/tubesock)
 
 Tubesock lets you use websockets from rack and rails 4+ by using Rack's new hijack interface to access the underlying socket connection.
 
