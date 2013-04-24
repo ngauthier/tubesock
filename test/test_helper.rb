@@ -1,4 +1,7 @@
 require 'bundler/setup'
+require 'simplecov'
+SimpleCov.start
+require 'active_support'
 require 'minitest/autorun'
 require 'webrick'
 require 'stringio'

@@ -1,5 +1,5 @@
 require "tubesock/version"
-require "tubesock/hijack" if defined?(Rails)
+require "tubesock/hijack" if defined?(ActiveSupport)
 require "websocket"
 
 # Easily interact with WebSocket connections over Rack.

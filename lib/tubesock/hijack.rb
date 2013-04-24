@@ -36,7 +36,4 @@ module Tubesock::Hijack
       render text: nil, status: -1
     end
   end
-
-  module ClassMethods
-  end
 end
