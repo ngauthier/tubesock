@@ -76,6 +76,7 @@ class Tubesock
       break if data.empty?
       framebuffer << data
       while frame = framebuffer.next
+        return if frame.data == "\x03\xe9".b  # means that the browser has quit
         yield frame.data
       end
     end
