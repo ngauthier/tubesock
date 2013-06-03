@@ -38,8 +38,12 @@ class Tubesock::TestCase::TestInteraction
     )
   end
 
+  def write_raw(message)
+    @client_socket << message
+  end
+
   def write(message)
-    @client_socket << WebSocket::Frame::Outgoing::Client.new(
+    write_raw WebSocket::Frame::Outgoing::Client.new(
       version: version,
       data:    JSON.dump(message),
       type:    :text
@@ -53,9 +57,13 @@ class Tubesock::TestCase::TestInteraction
     JSON.load(framebuffer.next.data)
   end
 
+  def join
+    @thread.join
+  end
+
   def close
     @client_socket.close
-    @thread.join
+    join
   end
 
   def tubesock
