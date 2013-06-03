@@ -8,10 +8,10 @@ require 'stringio'
 require 'tubesock'
 require 'json'
 
-class Tubesock::TestCase < MiniTest::Unit::TestCase
+class Tubesock::TestCase < Minitest::Unit::TestCase
 end
 
-# Abstrack away frames and sockets so that
+# Abstract away frames and sockets so that
 # tests can focus on message interaction
 class Tubesock::TestCase::TestInteraction
   def initialize
