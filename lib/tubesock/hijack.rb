@@ -30,7 +30,7 @@ module Tubesock::Hijack
       sock = Tubesock.hijack(env)
       yield sock
       sock.onclose do
-        ActiveRecord::Base.clear_active_connections!
+        ActiveRecord::Base.clear_active_connections! if defined? ActiveRecord
       end
       sock.listen
       render text: nil, status: -1
