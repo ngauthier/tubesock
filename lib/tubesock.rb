@@ -76,7 +76,7 @@ class Tubesock
       break if data.empty?
       framebuffer << data
       while frame = framebuffer.next
-        return if frame.data == ['03e9'].pack('H*')  # means that the browser has quit
+        return if frame.type == :close
         yield frame.data
       end
     end

@@ -38,16 +38,13 @@ class TubesockTest < Tubesock::TestCase
     closed.called.must_equal true
   end
 
-  def test_hijack_invalid_json_from_client
+  def test_close_on_close_frame
     interaction = TestInteraction.new
 
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
       tubesock.onclose &closed
-
-      tubesock.onmessage do |message|
-      end
     end
 
     # That's what Firefox sends when disconnecting.
