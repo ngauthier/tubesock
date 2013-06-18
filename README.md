@@ -4,7 +4,7 @@
 
 Tubesock lets you use websockets from rack and rails 4+ by using Rack's new hijack interface to access the underlying socket connection.
 
-In contrast to other websocket libraries, Tubesock does not use a reactor (read: no eventmachine). Instead, it leverages Rails 4's new full-stack concurrency support. Note that this means you must use a concurrent server. We recommend Puma.
+In contrast to other websocket libraries, Tubesock does not use a reactor (read: no eventmachine). Instead, it leverages Rails 4's new full-stack concurrency support. Note that this means you must use a concurrent server. We recommend Puma > 2.0.0.
 
 ## Installation
 
@@ -56,11 +56,11 @@ class ChatController < ApplicationController
   def chat
     hijack do |tubesock|
       tubesock.onopen do
-        tubesock.send_data message: "Hello, friend"
+        tubesock.send_data "Hello, friend"
       end
 
       tubesock.onmessage do |data|
-        tubesock.send_data message: "You said: #{data[:message]}"
+        tubesock.send_data "You said: #{data}"
       end
     end
   end

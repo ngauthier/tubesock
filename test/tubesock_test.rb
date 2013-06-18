@@ -25,13 +25,13 @@ class TubesockTest < Tubesock::TestCase
       tubesock.onclose &closed
 
       tubesock.onmessage do |message|
-        tubesock.send_data message: "Hello #{message["name"]}"
+        tubesock.send_data "Hello #{message}"
       end
     end
 
-    interaction.write name: "Nick"
+    interaction.write "Nick"
     data = interaction.read
-    data["message"].must_equal "Hello Nick"
+    data.must_equal "Hello Nick"
     interaction.close
 
     opened.called.must_equal true

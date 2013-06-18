@@ -36,7 +36,7 @@ class Tubesock
   def send_data data, type = :text
     frame = WebSocket::Frame::Outgoing::Server.new(
       version: @version,
-      data: JSON.dump(data),
+      data: data,
       type: type
     )
     @socket.write frame.to_s
@@ -61,7 +61,7 @@ class Tubesock
       Thread.current.abort_on_exception = true
       @open_handlers.each(&:call)
       each_frame do |data|
-        @message_handlers.each{|h| h.call(JSON.load(data)) }
+        @message_handlers.each{|h| h.call(data) }
       end
       @close_handlers.each(&:call)
       @socket.close
