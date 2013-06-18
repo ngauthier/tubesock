@@ -12,9 +12,6 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'tubesock'
-# currently, the ability to setup a websocket from rack is only
-# available on my fork. If/when the PR is merged this will become a gem dependency
-gem 'websocket', github: "ngauthier/websocket-ruby"
 ```
 
 And then execute:
