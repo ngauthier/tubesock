@@ -67,8 +67,6 @@ class ChatController < ApplicationController
 end
 ```
 
-For a full example, check out [Tubesock Example](http://github.com/ngauthier/tubesock-example).
-
 ## Contributing
 
 1. Fork it
