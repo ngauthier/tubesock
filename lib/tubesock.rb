@@ -5,8 +5,7 @@ require "websocket"
 # Easily interact with WebSocket connections over Rack.
 # TODO: Example with pure Rack
 class Tubesock
-  class HijackNotAvailable < RuntimeError
-  end
+  HijackNotAvailable = Class.new RuntimeError
 
   def initialize(socket, version)
     @socket     = socket
@@ -57,21 +56,40 @@ class Tubesock
   end
 
   def listen
+    keepalive
     Thread.new do
       Thread.current.abort_on_exception = true
       @open_handlers.each(&:call)
       each_frame do |data|
         @message_handlers.each{|h| h.call(data) }
       end
-      @close_handlers.each(&:call)
-      @socket.close
+      close
     end
+  end
+
+  def close
+    @close_handlers.each(&:call)
+    @socket.close unless @socket.closed?
+  end
+
+  def keepalive
+    Thread.new do
+      Thread.current.abort_on_exception = true
+      loop do
+        sleep 5
+        ping
+      end
+    end
+  end
+
+  def ping
+    send_data "tubesock-ping", :ping
   end
 
   private
   def each_frame
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
-    while !@socket.closed?
+    while IO.select([@socket])
       data, addrinfo = @socket.recvfrom(2000)
       break if data.empty?
       framebuffer << data
@@ -80,5 +98,7 @@ class Tubesock
         yield frame.data
       end
     end
+  rescue Errno::ECONNRESET
+    nil # client disconnected
   end
 end
