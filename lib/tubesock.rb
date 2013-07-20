@@ -39,7 +39,7 @@ class Tubesock
       type: type
     )
     @socket.write frame.to_s
-  rescue IOError
+  rescue IOError, Errno::EPIPE
     close
   end
 
@@ -73,17 +73,17 @@ class Tubesock
   end
 
   def keepalive
-    Thread.new do
+    thread = Thread.new do
       Thread.current.abort_on_exception = true
       loop do
         sleep 5
-        ping
+        send_data nil, :ping
       end
     end
-  end
 
-  def ping
-    send_data "tubesock-ping", :ping
+    onclose do
+      thread.kill
+    end
   end
 
   private
@@ -94,8 +94,12 @@ class Tubesock
       break if data.empty?
       framebuffer << data
       while frame = framebuffer.next
-        return if frame.type == :close
-        yield frame.data
+        case frame.type
+        when :close
+          return
+        when :text, :binary
+          yield frame.data
+        end
       end
     end
   rescue Errno::ECONNRESET
