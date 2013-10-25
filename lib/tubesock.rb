@@ -102,7 +102,7 @@ class Tubesock
         end
       end
     end
-  rescue Errno::ECONNRESET
-    nil # client disconnected
+  rescue Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::ECONNRESET
+    nil # client disconnected or timed out
   end
 end
