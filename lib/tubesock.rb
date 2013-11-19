@@ -72,6 +72,10 @@ class Tubesock
     @socket.close unless @socket.closed?
   end
 
+  def closed?
+    @socket.closed?
+  end
+
   def keepalive
     thread = Thread.new do
       Thread.current.abort_on_exception = true
