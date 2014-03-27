@@ -60,8 +60,10 @@ class Tubesock
     Thread.new do
       Thread.current.abort_on_exception = true
       @open_handlers.each(&:call)
+      release_db_connections
       each_frame do |data|
         @message_handlers.each{|h| h.call(data) }
+        release_db_connections
       end
       close
     end
@@ -69,6 +71,7 @@ class Tubesock
 
   def close
     @close_handlers.each(&:call)
+    release_db_connections
     @socket.close unless @socket.closed?
   end
 
@@ -91,6 +94,10 @@ class Tubesock
   end
 
   private
+  def release_db_connections
+    ActiveRecord::Base.clear_active_connections! if defined? ActiveRecord
+  end
+  
   def each_frame
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
     while IO.select([@socket])
