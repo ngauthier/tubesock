@@ -69,10 +69,10 @@ class Tubesock
 
   def close
     @close_handlers.each(&:call)
-    if @socket.class == Puma::MiniSSL::Socket
-      @socket.close
-    else
+    if @socket.respond_to?(:closed?)
       @socket.close unless @socket.closed?
+    else
+      @socket.close
     end
   end
 
@@ -98,10 +98,10 @@ class Tubesock
   def each_frame
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
     while IO.select([@socket])
-      if @socket.class == Puma::MiniSSL::Socket
-        data, addrinfo = @socket.readpartial(2000)
-      else
+      if @socket.respond_to?(:recvfrom)
         data, addrinfo = @socket.recvfrom(2000)
+      else
+        data, addrinfo = @socket.readpartial(2000)
       end
       break if data.empty?
       framebuffer << data

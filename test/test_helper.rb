@@ -14,8 +14,9 @@ end
 # Abstract away frames and sockets so that
 # tests can focus on message interaction
 class Tubesock::TestCase::TestInteraction
-  def initialize
+  def initialize(socket = nil)
     @client_socket, @server_socket = UNIXSocket.pair
+    @client_socket, @server_socket = socket, socket if socket
   end
 
   def handshake
@@ -70,7 +71,11 @@ class Tubesock::TestCase::TestInteraction
     tubesock = Tubesock.hijack(env)
     yield tubesock
     @thread = tubesock.listen
-    @client_socket.recvfrom 2000 # flush the handshake
+    if @client_socket.respond_to?(:recvfrom)
+      @client_socket.recvfrom 2000 # flush the handshake
+    else
+      @client_socket.readpartial 2000 # flush the handshake
+    end
     tubesock
   end
 end
