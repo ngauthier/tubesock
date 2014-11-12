@@ -101,7 +101,7 @@ class Tubesock
       if @socket.respond_to?(:recvfrom)
         data, addrinfo = @socket.recvfrom(2000)
       else
-        data, addrinfo = @socket.readpartial(2000)
+        data, addrinfo = @socket.readpartial(2000), @socket.peeraddr
       end
       break if data.empty?
       framebuffer << data
