@@ -69,7 +69,7 @@ class Tubesock
 
   def close
     @close_handlers.each(&:call)
-    @socket.close unless @socket.respond_to(:closed?)
+    @socket.close unless @socket.respond_to?(:closed?) && @socket.closed?
   end
 
   def closed?
