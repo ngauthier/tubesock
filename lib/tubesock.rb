@@ -74,7 +74,7 @@ class Tubesock
 
   def closed?
     return @socket.closed? if @socket.respond_to?(:closed)
-    return @socket.to_io.closed?.to_s @socket.respond_to?(:to_io) && @socket.to_io.respond_to?(:closed?)
+    return @socket.to_io.closed? if @socket.respond_to?(:to_io) and @socket.to_io.respond_to?(:closed?)
     true
   end
 
