@@ -29,21 +29,29 @@ Or install it yourself as:
 To use Tubesock with rack, you need to hijack the rack environment and then return an asynchronous response. For example:
 
 ```ruby
-def self.call(env)
-  if websocket?(env)
-    tubesock = hijack(env)
-    tubesock.listen
-    tubesock.onmessage do |message|
-      puts "Got #{message}"
+require 'tubesock'
+
+class Server
+  def call(env)
+    if env["HTTP_UPGRADE"] == 'websocket'
+      tubesock = Tubesock.hijack(env)
+      tubesock.onmessage do |message|
+        puts "Got #{message}"
+      end
+      tubesock.listen
+      [ -1, {}, [] ]
+    else
+      [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
     end
-    [ -1, {}, [] ]
-  else
-    [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
   end
 end
 ```
 
-NOTE: I have not gotten the above to work just yet with just puma or thin. For now, check out the rails example.
+Then you could do the following in your config.ru file to use this class:
+
+```ruby
+run Server.new
+```
 
 ### Rails 4+
 
