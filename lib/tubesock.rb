@@ -69,11 +69,13 @@ class Tubesock
 
   def close
     @close_handlers.each(&:call)
-    @socket.close unless @socket.closed?
+    @socket.close unless closed?
   end
 
   def closed?
-    @socket.closed?
+    return @socket.closed? if @socket.respond_to?(:closed)
+    return @socket.to_io.closed? if @socket.respond_to?(:to_io) and @socket.to_io.respond_to?(:closed?)
+    true
   end
 
   def keepalive
@@ -94,7 +96,12 @@ class Tubesock
   def each_frame
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
     while IO.select([@socket])
-      data, addrinfo = @socket.recvfrom(2000)
+      if(@socket.respond_to?(:readpartial) && @socket.respond_to?(:peeraddr))
+        data, addrinfo = @socket.readpartial(2000), @socket.peeraddr
+      else
+        data, addrinfo = @socket.recvfrom(2000)
+      end
+
       break if data.empty?
       framebuffer << data
       while frame = framebuffer.next
@@ -106,6 +113,7 @@ class Tubesock
         end
       end
     end
+
   rescue Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::ECONNRESET, IOError, Errno::EBADF
     nil # client disconnected or timed out
   end
