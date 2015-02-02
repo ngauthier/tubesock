@@ -69,7 +69,11 @@ class Tubesock
 
   def close
     @close_handlers.each(&:call)
-    @socket.close unless @socket.closed?
+    if @socket.respond_to?(:closed?)
+      @socket.close unless @socket.closed?
+    else
+      @socket.close
+    end
   end
 
   def closed?
@@ -94,7 +98,11 @@ class Tubesock
   def each_frame
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
     while IO.select([@socket])
-      data, addrinfo = @socket.recvfrom(2000)
+      if @socket.respond_to?(:recvfrom)
+        data, addrinfo = @socket.recvfrom(2000)
+      else
+        data, addrinfo = @socket.readpartial(2000), @socket.peeraddr
+      end
       break if data.empty?
       framebuffer << data
       while frame = framebuffer.next
