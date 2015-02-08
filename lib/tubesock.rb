@@ -39,7 +39,7 @@ class Tubesock
       type: type
     )
     @socket.write frame.to_s
-  rescue IOError, Errno::EPIPE
+  rescue IOError, Errno::EPIPE, Errno::ETIMEDOUT
     close
   end
 
