@@ -14,6 +14,8 @@ class Tubesock
     @open_handlers    = []
     @message_handlers = []
     @close_handlers   = []
+    
+    @active = true
   end
 
   def self.hijack(env)
@@ -68,12 +70,16 @@ class Tubesock
   end
 
   def close
+    return unless @active
+    
     @close_handlers.each(&:call)
     if @socket.respond_to?(:closed?)
       @socket.close unless @socket.closed?
     else
       @socket.close
     end
+    
+    @active = false
   end
 
   def closed?
