@@ -54,4 +54,103 @@ class TubesockTest < Tubesock::TestCase
 
     closed.called.must_equal true
   end
+
+  def test_onerror_callback
+    interaction = TestInteraction.new
+
+    closed = MockProc.new
+    errored = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onclose &closed
+
+      tubesock.onerror &errored
+      tubesock.onmessage do |message|
+        raise "Really really really bad error"
+      end
+    end
+
+    interaction.write "Hello world"
+    interaction.join
+
+    errored.called.must_equal true
+
+  end
+
+  def test_prevent_close_on_error
+    interaction = TestInteraction.new
+
+    closed = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onclose &closed
+
+      tubesock.onerror do |error, message|
+        tubesock.prevent_close_on_error
+      end
+      tubesock.onmessage do |message|
+        raise "Really really really bad error"
+      end
+    end
+
+    interaction.write "Hello world"
+    closed.called.must_equal nil
+
+    interaction.close
+  end
+
+  def test_default_close_on_error
+    interaction = TestInteraction.new
+
+    closed = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onclose &closed
+
+      tubesock.onmessage do |message|
+        raise "Really really really bad error"
+      end
+    end
+
+    interaction.write "Hello world"
+    interaction.join
+
+    closed.called.must_equal true
+  end
+
+  def test_multi_frame_no_close
+    interaction = TestInteraction.new
+
+    closed = MockProc.new
+
+    messaged = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onclose &closed
+      tubesock.onmessage &messaged
+    end
+
+    interaction.write "Hello world"
+    sleep 1
+    closed.called.must_equal nil
+
+    interaction.close
+  end
+
+  def test_close_on_open_handler
+    interaction = TestInteraction.new
+
+    closed = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onclose &closed
+      tubesock.onopen do
+        raise "Error opening socket"
+      end
+    end
+
+    proc {interaction.join}.must_raise RuntimeError
+    closed.called.must_equal true
+  end
+
 end
