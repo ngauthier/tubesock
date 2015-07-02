@@ -14,7 +14,10 @@ class Tubesock
     @open_handlers    = []
     @message_handlers = []
     @close_handlers   = []
-    
+    @error_handlers   = []
+
+    @close_on_error = true
+
     @active = true
   end
 
@@ -32,6 +35,10 @@ class Tubesock
     else
       raise Tubesock::HijackNotAvailable
     end
+  end
+
+  def prevent_close_on_error
+    @close_on_error = false
   end
 
   def send_data data, type = :text
@@ -57,28 +64,41 @@ class Tubesock
     @close_handlers << block
   end
 
+  def onerror(&block)
+    @error_handlers << block
+  end
+
   def listen
     keepalive
     Thread.new do
-      Thread.current.abort_on_exception = true
-      @open_handlers.each(&:call)
-      each_frame do |data|
-        @message_handlers.each{|h| h.call(data) }
+      begin
+        @open_handlers.each(&:call)
+        each_frame do |data|
+          @message_handlers.each do |h|
+            begin
+              h.call(data)
+            rescue => e
+              @error_handlers.each{|eh| eh.call(e,data)}
+              close if @close_on_error
+            end
+          end
+        end
+      ensure
+        close
       end
-      close
     end
   end
 
   def close
     return unless @active
-    
+
     @close_handlers.each(&:call)
     if @socket.respond_to?(:closed?)
       @socket.close unless @socket.closed?
     else
       @socket.close
     end
-    
+
     @active = false
   end
 
