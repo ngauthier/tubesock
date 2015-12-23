@@ -93,13 +93,17 @@ class Tubesock
     return unless @active
 
     @close_handlers.each(&:call)
+    close!
+
+    @active = false
+  end
+  
+  def close!
     if @socket.respond_to?(:closed?)
       @socket.close unless @socket.closed?
     else
       @socket.close
     end
-
-    @active = false
   end
 
   def closed?
