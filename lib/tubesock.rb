@@ -70,9 +70,9 @@ class Tubesock
 
   def listen
     keepalive
+    @open_handlers.each(&:call)
     Thread.new do
       begin
-        @open_handlers.each(&:call)
         each_frame do |data|
           @message_handlers.each do |h|
             begin
