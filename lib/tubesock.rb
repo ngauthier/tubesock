@@ -71,6 +71,7 @@ class Tubesock
   def listen
     keepalive
     Thread.new do
+      Thread.current.abort_on_exception = true
       begin
         @open_handlers.each(&:call)
         each_frame do |data|
