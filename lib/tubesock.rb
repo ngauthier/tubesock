@@ -72,12 +72,7 @@ class Tubesock
     keepalive
     Thread.new do
       begin
-        begin
-          @open_handlers.each(&:call)
-        rescue => e
-          @error_handlers.each{|eh| eh.call(e)}
-          close if @close_on_error
-        end
+        call_open_handlers
         each_frame do |data|
           @message_handlers.each do |h|
             begin
@@ -94,6 +89,13 @@ class Tubesock
     end
   end
 
+  def call_open_handlers
+    @open_handlers.each(&:call)
+  rescue => e
+    @error_handlers.each{|eh| eh.call(e)}
+    close if @close_on_error
+  end
+
   def close
     return unless @active
 
@@ -102,7 +104,7 @@ class Tubesock
 
     @active = false
   end
-  
+
   def close!
     if @socket.respond_to?(:closed?)
       @socket.close unless @socket.closed?
