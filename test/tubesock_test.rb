@@ -137,6 +137,22 @@ class TubesockTest < Tubesock::TestCase
     interaction.close
   end
 
+  def test_exceptions_passed_to_error_handlers_on_open_handler
+    interaction = TestInteraction.new
+
+    errored = MockProc.new
+
+    interaction.tubesock do |tubesock|
+      tubesock.onerror &errored
+      tubesock.onopen do
+        raise "Error opening socket"
+      end
+    end
+
+    interaction.join
+    errored.called.must_equal true
+  end
+
   def test_close_on_open_handler
     interaction = TestInteraction.new
 
@@ -149,7 +165,7 @@ class TubesockTest < Tubesock::TestCase
       end
     end
 
-    proc {interaction.join}.must_raise RuntimeError
+    interaction.join
     closed.called.must_equal true
   end
 
