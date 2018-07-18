@@ -27,7 +27,7 @@ module Tubesock::Hijack
 
   included do
     def hijack
-      sock = Tubesock.hijack(env)
+      sock = Tubesock.hijack(request.env)
       yield sock
       sock.onclose do
         ActiveRecord::Base.clear_active_connections! if defined? ActiveRecord
