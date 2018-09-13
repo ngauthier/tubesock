@@ -6,6 +6,7 @@ class MockEngine
   def read; "data" end
   def inject(data); end
   def extract; end
+  def init?; true; end
   def write(data)
     1
   end
@@ -14,6 +15,7 @@ end
 class MockSocket < IO
   def initialize; end
   def close; end
+  def closed?; false; end
   def readpartial(len); end
 end
 
@@ -36,7 +38,6 @@ class TubesockPumaTest < Tubesock::TestCase
 
     interaction.tubesock do |tubesock|
       proc { tubesock.close }.must_be_silent
-
     end
 
   end

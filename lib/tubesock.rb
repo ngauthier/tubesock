@@ -130,9 +130,9 @@ class Tubesock
     framebuffer = WebSocket::Frame::Incoming::Server.new(version: @version)
     while IO.select([@socket])
       if @socket.respond_to?(:recvfrom)
-        data, addrinfo = @socket.recvfrom(2000)
+        data, _addrinfo = @socket.recvfrom(2000)
       else
-        data, addrinfo = @socket.readpartial(2000), @socket.peeraddr
+        data, _addrinfo = @socket.readpartial(2000), @socket.peeraddr
       end
       break if data.empty?
       framebuffer << data

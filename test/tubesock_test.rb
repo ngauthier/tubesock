@@ -21,8 +21,8 @@ class TubesockTest < Tubesock::TestCase
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onopen  &opened
-      tubesock.onclose &closed
+      tubesock.onopen(&opened)
+      tubesock.onclose(&closed)
 
       tubesock.onmessage do |message|
         tubesock.send_data "Hello #{message}"
@@ -44,7 +44,7 @@ class TubesockTest < Tubesock::TestCase
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
+      tubesock.onclose(&closed)
     end
 
     # That's what Firefox sends when disconnecting.
@@ -62,9 +62,9 @@ class TubesockTest < Tubesock::TestCase
     errored = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
+      tubesock.onclose(&closed)
 
-      tubesock.onerror &errored
+      tubesock.onerror(&errored)
       tubesock.onmessage do |message|
         raise "Really really really bad error"
       end
@@ -83,7 +83,7 @@ class TubesockTest < Tubesock::TestCase
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
+      tubesock.onclose(&closed)
 
       tubesock.onerror do |error, message|
         tubesock.prevent_close_on_error
@@ -105,7 +105,7 @@ class TubesockTest < Tubesock::TestCase
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
+      tubesock.onclose(&closed)
 
       tubesock.onmessage do |message|
         raise "Really really really bad error"
@@ -126,8 +126,8 @@ class TubesockTest < Tubesock::TestCase
     messaged = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
-      tubesock.onmessage &messaged
+      tubesock.onclose(&closed)
+      tubesock.onmessage(&messaged)
     end
 
     interaction.write "Hello world"
@@ -143,7 +143,7 @@ class TubesockTest < Tubesock::TestCase
     closed = MockProc.new
 
     interaction.tubesock do |tubesock|
-      tubesock.onclose &closed
+      tubesock.onclose(&closed)
       tubesock.onopen do
         raise "Error opening socket"
       end

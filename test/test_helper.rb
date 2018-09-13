@@ -53,7 +53,7 @@ class Tubesock::TestCase::TestInteraction
 
   def read
     framebuffer = WebSocket::Frame::Incoming::Client.new(version: version)
-    data, addrinfo = @client_socket.recvfrom(2000)
+    data, _addrinfo = @client_socket.recvfrom(2000)
     framebuffer << data
     framebuffer.next.data
   end
