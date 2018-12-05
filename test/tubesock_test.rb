@@ -55,6 +55,20 @@ class TubesockTest < Tubesock::TestCase
     closed.called.must_equal true
   end
 
+  def test_pong_on_ping_frame
+    interaction = TestInteraction.new
+    interaction.tubesock {}
+
+    # Client ping frame from: WebSocket::Frame::Outgoing::Client.new(version: 13, data: "\x1d\xcc\x18G", type: :ping).to_s
+    interaction.write_raw "\x89\x84$\xBE\xDAy9r\xC2>".force_encoding('binary')
+
+    frame = interaction.read_frame
+    frame.data.must_equal "\x1d\xcc\x18G".force_encoding('binary')
+    frame.type.must_equal :pong
+
+    interaction.close
+  end
+
   def test_onerror_callback
     interaction = TestInteraction.new
 
