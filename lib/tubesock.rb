@@ -142,6 +142,11 @@ class Tubesock
           return
         when :text, :binary
           yield frame.data
+        when :ping
+          # According to https://tools.ietf.org/html/rfc6455#section-5.5.3:
+          #   A Pong frame sent in response to a Ping frame must have identical "Application data" as
+          #   found in the message body of the Ping frame being replied to.'
+          send_data frame.data, :pong
         end
       end
     end
