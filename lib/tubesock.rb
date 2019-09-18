@@ -68,6 +68,11 @@ class Tubesock
     @error_handlers << block
   end
 
+  def call_error_handlers(e, data = nil)
+    @error_handlers.each{|eh| eh.call(e,data)}
+    close if @close_on_error
+  end
+
   def listen
     keepalive
     Thread.new do
@@ -79,8 +84,7 @@ class Tubesock
             begin
               h.call(data)
             rescue => e
-              @error_handlers.each{|eh| eh.call(e,data)}
-              close if @close_on_error
+              call_error_handlers(e, data)
             end
           end
         end
@@ -116,7 +120,11 @@ class Tubesock
       Thread.current.abort_on_exception = true
       loop do
         sleep 5
-        send_data nil, :ping
+        begin
+          send_data nil, :ping
+        rescue StandardError => e
+          call_error_handlers(e)
+        end
       end
     end
 
