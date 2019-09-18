@@ -1,6 +1,6 @@
-# Tubesock
+# Tubesock - !! This gem is no longer updated. We recommend you use Rails's built-in [ActionCable](https://guides.rubyonrails.org/action_cable_overview.html) !!
 
-[![Build Status](https://travis-ci.org/ngauthier/tubesock.png)](https://travis-ci.org/ngauthier/tubesock) [![Code Climate](https://codeclimate.com/github/ngauthier/tubesock.png)](https://codeclimate.com/github/ngauthier/tubesock) [ ![Codeship Status for ngauthier/tubesock](https://codeship.io/projects/cea94c50-382c-0132-52d3-6ed5aaf58bcd/status)](https://codeship.io/projects/41922)
+[![Build Status](https://travis-ci.org/ngauthier/tubesock.png)](https://travis-ci.org/ngauthier/tubesock) [![Code Climate](https://codeclimate.com/github/ngauthier/tubesock.png)](https://codeclimate.com/github/ngauthier/tubesock)
 
 Tubesock lets you use websockets from rack and rails 4+ by using Rack's new hijack interface to access the underlying socket connection.
 
